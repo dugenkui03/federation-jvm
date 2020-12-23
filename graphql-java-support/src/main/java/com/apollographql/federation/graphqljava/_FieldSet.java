@@ -4,6 +4,9 @@ import graphql.Scalars;
 import graphql.language.ScalarTypeDefinition;
 import graphql.schema.GraphQLScalarType;
 
+/**
+ * 标量：代表一个 field 集合
+ */
 public final class _FieldSet {
     static final String typeName = "_FieldSet";
 

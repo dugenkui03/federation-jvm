@@ -1,6 +1,5 @@
 package com.apollographql.federation.graphqljava;
 
-import graphql.language.DirectiveDefinition;
 import graphql.language.ObjectTypeDefinition;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.RuntimeWiring;
@@ -12,13 +11,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.Reader;
-import java.util.Comparator;
 
 public final class Federation {
+
+    // 没啥用
     private static final SchemaGenerator.Options generatorOptions = SchemaGenerator.Options.defaultOptions();
 
-    private Federation() {
-    }
+    private Federation() { }
 
     @NotNull
     public static SchemaTransformer transform(final GraphQLSchema schema) {

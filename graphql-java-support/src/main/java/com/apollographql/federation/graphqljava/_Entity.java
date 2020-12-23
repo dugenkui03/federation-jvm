@@ -12,13 +12,15 @@ import java.util.Set;
 import static graphql.schema.GraphQLArgument.newArgument;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 
+/**
+ * todo ？类型名称、字段名称和参数名称？
+ */
 public final class _Entity {
     public static final String argumentName = "representations";
     static final String typeName = "_Entity";
     static final String fieldName = "_entities";
 
-    private _Entity() {
-    }
+    private _Entity() { }
 
     // graphql-java will mutate GraphQLTypeReference in-place,
     // so we need to create a new instance every time.
