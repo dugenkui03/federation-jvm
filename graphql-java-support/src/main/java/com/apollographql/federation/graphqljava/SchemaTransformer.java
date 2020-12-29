@@ -23,14 +23,35 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class SchemaTransformer {
+
+    // 标记节点
     private static final Object DUMMY = new Object();
-    // Apollo Gateway will fail composition if it sees standard directive definitions.
-    private static final Set<String> STANDARD_DIRECTIVES =
-            new HashSet<>(Arrays.asList("deprecated", "include", "skip", "specifiedBy"));
+
+    // Apollo Gateway will fail composition
+    // if it sees standard directive definitions.
+    private static final Set<String> STANDARD_DIRECTIVES = new HashSet<>(
+            Arrays.asList("deprecated", "include", "skip", "specifiedBy")
+    );
+
+    /**
+     * 原始未修改的schema
+     */
     private final GraphQLSchema originalSchema;
+
+    /**
+     * 类型解析器
+     */
     private TypeResolver entityTypeResolver = null;
+
+    /**
+     * 实体DF
+     */
     private DataFetcher entitiesDataFetcher = null;
     private DataFetcherFactory entitiesDataFetcherFactory = null;
+
+    /**
+     * _Any的转换器
+     */
     private Coercing coercingForAny = _Any.defaultCoercing;
 
     SchemaTransformer(GraphQLSchema originalSchema) {
@@ -43,6 +64,10 @@ public final class SchemaTransformer {
         return this;
     }
 
+
+    /**
+     * todo DF 和 DFFactory 不一起设置吗？
+     */
     @NotNull
     public SchemaTransformer fetchEntities(DataFetcher entitiesDataFetcher) {
         this.entitiesDataFetcher = entitiesDataFetcher;
@@ -64,31 +89,40 @@ public final class SchemaTransformer {
 
     @NotNull
     public final GraphQLSchema build() throws SchemaProblem {
-        final List<GraphQLError> errors = new ArrayList<>();
 
-        // Make new Schema
+        // 创建一个新的schema
         final GraphQLSchema.Builder newSchema = GraphQLSchema.newSchema(originalSchema);
 
-        final GraphQLObjectType originalQueryType = originalSchema.getQueryType();
-
+        // 创建一个新的GraphQLCodeRegistry
         final GraphQLCodeRegistry.Builder newCodeRegistry =
                 GraphQLCodeRegistry.newCodeRegistry(originalSchema.getCodeRegistry());
 
-        // Print the original schema as sdl and expose it as query { _service { sdl } }
-        final String sdl = sdl(originalSchema);
+        // 获取查询类型
+        final GraphQLObjectType originalQueryType = originalSchema.getQueryType();
+
+        // 新的查询对象：fixme 添加了 类型为 _Service 的字段 _service
         final GraphQLObjectType.Builder newQueryType = GraphQLObjectType.newObject(originalQueryType)
-                .field(_Service.field);
-        newCodeRegistry.dataFetcher(FieldCoordinates.coordinates(
+                .field(_Service._serviceField);
+
+        // 获取 Query._service 字段坐标
+        FieldCoordinates _serviceCoordinates = FieldCoordinates.coordinates(
                 originalQueryType.getName(),
-                _Service.fieldName
-                ),
-                (DataFetcher<Object>) environment -> DUMMY);
-        newCodeRegistry.dataFetcher(FieldCoordinates.coordinates(
+                _Service.fieldName // _service
+        );
+        // todo _serviceCoordinates 返回 DUMMY 对象
+        newCodeRegistry.dataFetcher(_serviceCoordinates, (DataFetcher<Object>) environment -> DUMMY);
+
+        // _Service.sdl 字段坐标
+        FieldCoordinates _ServiceSdl = FieldCoordinates.coordinates(
                 _Service.typeName,
                 _Service.sdlFieldName
-                ),
-                (DataFetcher<String>) environment -> sdl);
+        );
+        // todo 返回的是什么
+        // Print the original schema as sdl and expose it as query { _service { sdl } }
+        final String sdl = sdl(originalSchema);
+        newCodeRegistry.dataFetcher(_ServiceSdl, (DataFetcher<String>) environment -> sdl);
 
+        // fixme 获取所有包含 @key 的类型名称
         // Collecting all entity types: Types with @key directive and all types that implement them
         final Set<String> entityTypeNames = originalSchema.getAllTypesAsList().stream()
                 .filter(t -> t instanceof GraphQLDirectiveContainer &&
@@ -96,16 +130,20 @@ public final class SchemaTransformer {
                 .map(GraphQLNamedType::getName)
                 .collect(Collectors.toSet());
 
+        // todo
         final Set<String> entityConcreteTypeNames = originalSchema.getAllTypesAsList()
                 .stream()
                 .filter(type -> type instanceof GraphQLObjectType)
                 .filter(type -> entityTypeNames.contains(type.getName()) ||
+                        // todo 或者其继承的接口包括 @key指令？
                         ((GraphQLObjectType) type).getInterfaces()
                                 .stream()
                                 .anyMatch(itf -> entityTypeNames.contains(itf.getName())))
                 .map(GraphQLNamedType::getName)
                 .collect(Collectors.toSet());
 
+
+        final List<GraphQLError> errors = new ArrayList<>();
         // If there are entity types install: Query._entities(representations: [_Any!]!): [_Entity]!
         if (!entityConcreteTypeNames.isEmpty()) {
             newQueryType.field(_Entity.field(entityConcreteTypeNames));
@@ -116,14 +154,14 @@ public final class SchemaTransformer {
             }
 
             if (entityTypeResolver != null) {
-                newCodeRegistry.typeResolver(_Entity.typeName, entityTypeResolver);
+                newCodeRegistry.typeResolver(_Entity._ENTITY, entityTypeResolver);
             } else {
-                if (!newCodeRegistry.hasTypeResolver(_Entity.typeName)) {
+                if (!newCodeRegistry.hasTypeResolver(_Entity._ENTITY)) {
                     errors.add(new FederationError("Missing a type resolver for _Entity"));
                 }
             }
 
-            final FieldCoordinates _entities = FieldCoordinates.coordinates(originalQueryType.getName(), _Entity.fieldName);
+            final FieldCoordinates _entities = FieldCoordinates.coordinates(originalQueryType.getName(), _Entity._ENTITIES);
             if (entitiesDataFetcher != null) {
                 newCodeRegistry.dataFetcher(_entities, entitiesDataFetcher);
             } else if (entitiesDataFetcherFactory != null) {
@@ -152,8 +190,8 @@ public final class SchemaTransformer {
         // Gather type definitions to hide.
         final Set<String> hiddenTypeDefinitions = new HashSet<>();
         hiddenTypeDefinitions.add(_Any.typeName);
-        hiddenTypeDefinitions.add(_Entity.typeName);
-        hiddenTypeDefinitions.add(_FieldSet.typeName);
+        hiddenTypeDefinitions.add(_Entity._ENTITY);
+        hiddenTypeDefinitions.add(_FieldSet._FieldSet);
         hiddenTypeDefinitions.add(_Service.typeName);
 
         // Note that FederationSdlPrinter is a copy of graphql-java's SchemaPrinter that adds the

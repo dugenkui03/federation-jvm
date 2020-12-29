@@ -21,8 +21,15 @@ import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLScalarType.newScalar;
 
+/**
+ * 类型名称
+ *
+ * 默认转换工具：1. 直接返回对象；2. 解析文本的写法很有简练、学一下
+ */
 public final class _Any {
     public static final String typeName = "_Any";
+
+    private _Any() { }
 
     static final Coercing defaultCoercing = new Coercing() {
         @Override
@@ -35,6 +42,7 @@ public final class _Any {
             return input;
         }
 
+        // fixme
         @Nullable
         @Override
         public Object parseLiteral(Object input) throws CoercingParseLiteralException {
@@ -63,9 +71,6 @@ public final class _Any {
             return Assert.assertShouldNeverHappen();
         }
     };
-
-    private _Any() {
-    }
 
     static GraphQLScalarType type(Coercing coercing) {
         return newScalar()

@@ -8,12 +8,17 @@ import graphql.schema.GraphQLObjectType;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 import static graphql.schema.GraphQLObjectType.newObject;
 
+/**
+ * https://www.apollographql.com/docs/federation/federation-spec/#type-_service
+ *
+ * _ServiceType 和 _serviceField
+ */
 final class _Service {
     static final String typeName = "_Service";
     static final String fieldName = "_service";
     static final String sdlFieldName = "sdl";
 
-    static final GraphQLObjectType type = newObject()
+    static final GraphQLObjectType _ServiceType = newObject()
             .name(typeName)
             .field(newFieldDefinition()
                     .name(sdlFieldName)
@@ -21,9 +26,9 @@ final class _Service {
                     .build())
             .build();
 
-    static final GraphQLFieldDefinition field = newFieldDefinition()
+    static final GraphQLFieldDefinition _serviceField = newFieldDefinition()
             .name(fieldName)
-            .type(type)
+            .type(_ServiceType)
             .build();
 
     private _Service() {
