@@ -94,7 +94,7 @@ class FederationTest {
     void testSimpleService() {
         final GraphQLSchema federated = Federation.transform(productSDL)
                 .fetchEntities(env ->
-                        env.<List<Map<String, Object>>>getArgument(_Entity.argumentName)
+                        env.<List<Map<String, Object>>>getArgument(_Entity.REPRESENTATIONS)
                                 .stream()
                                 .map(map -> {
                                     if ("Product".equals(map.get("__typename"))) {
@@ -148,7 +148,7 @@ class FederationTest {
                 .fetchEntities(environment -> null)
                 .build();
 
-        final GraphQLUnionType entityType = (GraphQLUnionType) transformed.getType(_Entity.typeName);
+        final GraphQLUnionType entityType = (GraphQLUnionType) transformed.getType(_Entity._ENTITY);
 
         final Iterable<String> unionTypes = entityType
                 .getTypes()

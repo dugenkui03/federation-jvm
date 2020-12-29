@@ -66,11 +66,14 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * This can print an in memory GraphQL schema back to a logical schema definition
+ *
+ * fixme 将 graphqlSchema 转换成 schema定义。
  */
 public class FederationSdlPrinter {
     //
     // we use this so that we get the simple "@deprecated" as text and not a full exploded
     // text with arguments (but only when we auto add this)
+    // fixme 用来打印的 deprecated指令
     //
     private static final GraphQLDirective DeprecatedDirective4Printing = GraphQLDirective.newDirective()
             .name("deprecated")
@@ -82,15 +85,21 @@ public class FederationSdlPrinter {
      */
     public static class Options {
 
+        // 是否包含 内省类型
         private final boolean includeIntrospectionTypes;
 
+        // 是否包含标量
         private final boolean includeScalars;
 
+        // 是否使用ast定义
         private final boolean useAstDefinitions;
 
+        // 是否包含schema定义
         private final boolean includeSchemaDefinition;
 
+        // 是否包含指令定义
         private final boolean includeDirectiveDefinitions;
+
 
         private final boolean descriptionsAsHashComments;
 

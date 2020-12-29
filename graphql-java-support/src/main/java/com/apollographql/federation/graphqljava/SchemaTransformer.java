@@ -3,7 +3,6 @@ package com.apollographql.federation.graphqljava;
 import graphql.GraphQLError;
 import graphql.schema.Coercing;
 import graphql.schema.DataFetcher;
-import graphql.schema.DataFetcherFactories;
 import graphql.schema.DataFetcherFactory;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
@@ -155,14 +154,14 @@ public final class SchemaTransformer {
             }
 
             if (entityTypeResolver != null) {
-                newCodeRegistry.typeResolver(_Entity.typeName, entityTypeResolver);
+                newCodeRegistry.typeResolver(_Entity._ENTITY, entityTypeResolver);
             } else {
-                if (!newCodeRegistry.hasTypeResolver(_Entity.typeName)) {
+                if (!newCodeRegistry.hasTypeResolver(_Entity._ENTITY)) {
                     errors.add(new FederationError("Missing a type resolver for _Entity"));
                 }
             }
 
-            final FieldCoordinates _entities = FieldCoordinates.coordinates(originalQueryType.getName(), _Entity.fieldName);
+            final FieldCoordinates _entities = FieldCoordinates.coordinates(originalQueryType.getName(), _Entity._ENTITIES);
             if (entitiesDataFetcher != null) {
                 newCodeRegistry.dataFetcher(_entities, entitiesDataFetcher);
             } else if (entitiesDataFetcherFactory != null) {
@@ -191,8 +190,8 @@ public final class SchemaTransformer {
         // Gather type definitions to hide.
         final Set<String> hiddenTypeDefinitions = new HashSet<>();
         hiddenTypeDefinitions.add(_Any.typeName);
-        hiddenTypeDefinitions.add(_Entity.typeName);
-        hiddenTypeDefinitions.add(_FieldSet.typeName);
+        hiddenTypeDefinitions.add(_Entity._ENTITY);
+        hiddenTypeDefinitions.add(_FieldSet._FieldSet);
         hiddenTypeDefinitions.add(_Service.typeName);
 
         // Note that FederationSdlPrinter is a copy of graphql-java's SchemaPrinter that adds the

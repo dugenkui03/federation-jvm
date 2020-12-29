@@ -90,13 +90,14 @@ public final class Federation {
                 .forEachOrdered(typeRegistry::add);
 
         // Add scalar type for _FieldSet, since the directives depend on it.
-        if (!typeRegistry.getType(_FieldSet.typeName).isPresent()) {
+        // 添加标量类型 _FieldSet，因为指令依赖于该字段
+        if (!typeRegistry.getType(_FieldSet._FieldSet).isPresent()) {
             typeRegistry.add(_FieldSet.definition);
         }
 
         // Also add the implementation for _FieldSet.
-        if (!runtimeWiring.getScalars().containsKey(_FieldSet.typeName)) {
-            return copyRuntimeWiring(runtimeWiring).scalar(_FieldSet.type).build();
+        if (!runtimeWiring.getScalars().containsKey(_FieldSet._FieldSet)) {
+            return copyRuntimeWiring(runtimeWiring).scalar(_FieldSet._FieldSetType).build();
         } else {
             return runtimeWiring;
         }

@@ -47,7 +47,8 @@ public final class FederationDirectives {
 
     private static final GraphQLArgument fieldsArgument = newArgument()
             .name("fields")
-            .type(new GraphQLNonNull(_FieldSet.type))
+            // _FieldSet
+            .type(new GraphQLNonNull(_FieldSet._FieldSetType))
             .build();
 
     private static GraphQLArgument fieldsArgument(String value) {
@@ -58,7 +59,7 @@ public final class FederationDirectives {
 
     private static final InputValueDefinition fieldsDefinition = newInputValueDefinition()
             .name("fields")
-            .type(new NonNullType(new TypeName(_FieldSet.typeName)))
+            .type(new NonNullType(new TypeName(_FieldSet._FieldSet)))
             .build();
 
     /* directive @key(fields: _FieldSet!) on OBJECT | INTERFACE */
